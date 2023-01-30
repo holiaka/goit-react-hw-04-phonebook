@@ -1,36 +1,32 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { ContactForm } from "./ContactForm/ContactForm";
 import { Filter } from './Filter/Filter.jsx';
 import { ContactList } from './ContactList/ContactList.jsx';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
+  useEffect(() => {
     const pastContacts = JSON.parse(localStorage.getItem("contacts"));
-    if (pastContacts===null) {
+    if (pastContacts === null) {
       return;
     }
-    this.setState({contacts: pastContacts});
-  }
-  
-  componentDidUpdate(_, prevState) {
-    const { contacts } = this.state;
-    if (prevState.contacts !== contacts) {
+    setContacts(pastContacts);
+  }, []);
+
+  useEffect(() => {    
+    if (contacts !== setContacts((prev) => prev)) {
       localStorage.setItem("contacts", JSON.stringify(contacts))
     }
-  }
+  }, [contacts])
 
-  visibleContacts = () => {
-    return this.state.contacts.filter(contact => contact.name.toLowerCase().includes(this.state.filter.toLowerCase()));
+  const visibleContacts = () => {
+    return contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()));
   };  
 
-  handleSubmit = (evt) => {    
-    const {contacts} = this.state;
+  const handleSubmit = (evt) => {
     const filterName = contacts.find(contact => contact.name === evt.name);
     
     if (filterName) {
@@ -38,21 +34,18 @@ export class App extends Component {
       return;
     }
 
-    this.setState({ contacts: [...contacts, { id: nanoid(), name: evt.name, number: evt.number }] });
+    setContacts([...contacts, { id: nanoid(), name: evt.name, number: evt.number }]);
   };
 
-  findContacts = evt => {
-    const { value } = evt.target;
-    this.setState({ filter: value });
+  const findContacts = evt => {    
+    setFilter( evt.target.value );
   };
 
-  deleteContact = evt => {
-    const {contacts} = this.state;
-    this.setState ({contacts: contacts.filter(item => item.id !== evt.target.id)})
+  const deleteContact = evt => {    
+    setContacts (contacts.filter(item => item.id !== evt.target.id))
   }
 
-  render() {
-    return (
+  return (
       <div
         style={{
           height: '100vh',
@@ -70,16 +63,16 @@ export class App extends Component {
             fontSize: "36px",
             textAlign: 'center',
           }}>Phonebook</h1>
-          <ContactForm onSubmit={this.handleSubmit}></ContactForm>                 
+          <ContactForm onSubmit={handleSubmit}></ContactForm>                 
           <h2 style={{
             margin: 0,
             fontSize: '28px',
             textAlign: "center",
           }}>Contacts</h2>                    
-          <Filter onChange={this.findContacts}></Filter>
-          <ContactList contacts={this.visibleContacts} deleteContact={this.deleteContact}></ContactList>
+          <Filter onChange={findContacts}></Filter>
+          <ContactList contacts={visibleContacts} deleteContact={deleteContact}></ContactList>
         </div>
       </div>
     );
-  }
+
 }
