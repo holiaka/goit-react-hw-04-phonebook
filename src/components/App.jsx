@@ -8,18 +8,16 @@ export const App = () => {
   const [contacts, setContacts] = useState(() => initialContacts());
   const [filter, setFilter] = useState('');
 
-  function initialContacts () {
+  function initialContacts() {
     const pastContacts = JSON.parse(localStorage.getItem('contacts'));
     if (pastContacts === null) {
       return [];
     }
     return pastContacts;
-  };
+  }
 
   useEffect(() => {
-    if (contacts !== setContacts(prev => prev)) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
-    }
+    localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
 
   const visibleContacts = () => {
